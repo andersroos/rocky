@@ -1,6 +1,7 @@
 
 PIP := pip3
 PYTHON := python3
+TWINE := twine
 
 -include local.mk
 
@@ -20,7 +21,7 @@ test:
 publish: clean
 	$(PYTHON) setup.py sdist
 	$(PYTHON) setup.py bdist_wheel
-	$(PYTHON) upload dist/*
+	$(TWINE) upload dist/*
 
 clean:
 	rm -rf dist rocky.egg-info build

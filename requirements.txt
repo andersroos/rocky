@@ -3,3 +3,4 @@ psutil
 
 # Dev/Test
 nose
+twine

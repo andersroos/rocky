@@ -1,2 +1,4 @@
 .idea/
 rocky.egg-info/
+build/
+dist/
