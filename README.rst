@@ -1,9 +1,8 @@
-
-Rocky
-=====
-
 .. image:: https://travis-ci.org/andersroos/rocky.svg?branch=master
     :target: https://travis-ci.org/andersroos/rocky
+       
+Rocky
+=====
 
 A collection of small libs for better command line programs in
 production setting. This is not a framework, use a small bit or

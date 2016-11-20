@@ -1,12 +1,11 @@
 import os
 from collections import Mapping, OrderedDict, Iterable
 from configparser import ConfigParser
-from importlib.util import module_from_spec
-from importlib.util import spec_from_loader
-from importlib.machinery import SourceFileLoader
 from logging import getLogger, NOTSET
 
 import itertools
+
+import sys
 
 logger = getLogger("rocky")
 
@@ -53,6 +52,28 @@ strings.
 If getting a key not included in the filter None will be returned.
 
 """
+
+
+try:
+    # Python 3.5 and above.
+    from importlib.util import module_from_spec
+    from importlib.util import spec_from_loader
+    from importlib.machinery import SourceFileLoader
+
+    def load_module_from_file(filename, modulename):
+        loader = SourceFileLoader(modulename, filename)
+        spec = spec_from_loader(loader.name, loader)
+        module = module_from_spec(spec)
+        loader.exec_module(module)
+        return module
+
+except ImportError:
+    # Python 3.4 and below.
+    import imp
+
+    def load_module_from_file(filename, modulename):
+        imp.load_source(modulename, filename)
+        return sys.modules[modulename]
 
 
 __all__ = [
@@ -159,10 +180,7 @@ class PyFileSrc(PropsSrc):
         module_name, _ = os.path.splitext(basename)
 
         try:
-            loader = SourceFileLoader(module_name, filename)
-            spec = spec_from_loader(loader.name, loader)
-            module = module_from_spec(spec)
-            loader.exec_module(module)
+            module = load_module_from_file(filename, module_name)
         except FileNotFoundError:
             if fail_on_not_found:
                 raise
