@@ -5,6 +5,8 @@ from logging import getLogger, NOTSET
 
 import itertools
 
+# TODO Config vs conf
+
 import sys
 
 logger = getLogger("rocky")
@@ -102,11 +104,8 @@ class ConfigSrc(object):
         """ Init config source.
 
         src -- the source of the config, depends on the source
-
         name -- the name of the source
-
         mapping -- see module doc
-
         include -- see module doc
         """
         self.src = src
@@ -221,15 +220,29 @@ class ConfigFileSrc(ConfigSrc):
 
 # TODO Test.
 class FileContent(object):
-    """ Reads the content of a file and returns it for all keys. """
+    """ Reads the content of a file and return it as a string for all keys. """
 
-    def __init__(self, filename, name=None, fail_on_not_found=True):
+    def __init__(self, filename, name=None, fail_on_read_error=False, strip=True, encoding='utf-8'):
+        """
+        Init a file content source.
+
+        filename -- the filename to read
+        name -- the name of the source
+        fail_on_read_error -- raise exception if not found or permission denied or other errors
+        encoding -- decode the content to a string, set to None to skip decoding
+        strip -- strip the content before returning, only if encoding is set
+        """
         self.name = name or os.path.basename(filename)
         try:
-            with open(filename, 'r') as f:
-                self.value = f.read()
+            with open(filename, 'rb') as f:
+                value = f.read()
+                if encoding:
+                    value = value.decode('utf-8')
+                    if strip:
+                        value = value.strip()
+                self.value = value
         except OSError:
-            if fail_on_not_found:
+            if fail_on_read_error:
                 raise
             else:
                 self.value = None
