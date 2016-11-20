@@ -93,9 +93,10 @@ class stoppable(handle_signals):
         self.stop()
 
     def check_stop(self, throw=True):
-        """ Check if stop flag is set. If throw is True (default) Stop will be raised, if not stop flag is returned."""
+        """ Check if stop flag is set. If throw is True (default) Stop will be raised, if not it returns False if
+        program should stop. """
         if not throw:
-            return self._stop
+            return not self._stop
 
         if self._stop:
             raise Stop()
