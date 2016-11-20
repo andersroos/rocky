@@ -11,7 +11,7 @@ import time
 
 from rocky import Stop
 
-
+# TODO Move to process?
 logger = getLogger("rocky")
 
 class pid_file(ContextDecorator):
@@ -57,7 +57,7 @@ class pid_file(ContextDecorator):
         """
         self.progname = os.path.basename(sys.argv[0])
         self.dirname = dirname
-        self.basename = self.progname + '.pid'
+        self.basename = basename or (self.progname + '.pid')
         self.filename = filename or os.path.join(self.dirname, self.basename)
         self.max_age = max_age
         self.max_age_callback = max_age_callback
