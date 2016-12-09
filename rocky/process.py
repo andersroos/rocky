@@ -1,8 +1,9 @@
+import traceback
 from contextlib import ContextDecorator
 
 import sys
 from logging import getLogger
-from signal import signal, SIG_DFL, SIGINT
+from signal import signal, SIG_DFL, SIGINT, SIGUSR1
 
 from rocky import Stop
 
@@ -14,7 +15,7 @@ class log_exception(ContextDecorator):
     Context manager for logging exceptions and (optionally) exit with status.
     """
 
-    def __init__(self, ignore=(Stop,), message="Command '%s' failed, exiting: " % sys.argv[0], status=None):
+    def __init__(self, ignore=(Stop, SystemExit), message="Command '%s' failed, exiting: " % sys.argv[0], status=None):
         """
         On exceptions log exception and optionally sys.exit.
 
@@ -104,3 +105,16 @@ class stoppable(handle_signals):
     def stop(self):
         """ Set stop to true explicitly. """
         self._stop = True
+
+
+class pstack(handle_signals):
+    """ Dump python stack in log on signal (default SIGUSR1). """
+    
+    def __init__(self, signums=(SIGUSR1,)):
+        """
+        signums -- iterable on signals to dump stack for
+        """
+        super().__init__(signums=signums)
+
+    def on_signal(self, signum, frame):
+        logger.info("stack:\n" + "".join(traceback.format_stack(frame)))
