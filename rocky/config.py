@@ -218,7 +218,6 @@ class ConfigFileSrc(ConfigSrc):
         return self.src.get(*path, fallback=None)
 
 
-# TODO Test.
 class FileContent(object):
     """ Reads the content of a file and return it as a string for all keys. """
 
