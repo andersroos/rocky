@@ -2,7 +2,12 @@ import os
 import unittest
 from collections import namedtuple
 
-from rocky.config import DictSrc, as_path, PropsSrc, EnvSrc, PyFileSrc, ConfigFileSrc, Config, Default
+from os.path import join, dirname
+
+from rocky.config import DictSrc, as_path, PropsSrc, EnvSrc, PyFileSrc, ConfigFileSrc, Config, Default, FileContent
+
+
+testdir = dirname(__file__)
 
 
 class DictSrcTest(unittest.TestCase):
@@ -92,7 +97,7 @@ class OtherSourcesTest(unittest.TestCase):
         self.assertEqual(None, s.get('testing_a_hopefully_non_existent_environment_variable_4335'))
 
     def test_py_file_src_specifics(self):
-        s = PyFileSrc(os.path.join(os.path.dirname(__file__), "conf_python_module_for_t_e_s_t.py"))
+        s = PyFileSrc(join(testdir, "conf_python_module_for_t_e_s_t.py"))
 
         self.assertEqual("/dir", s.get('INSTALL_DIR'))
         self.assertEqual(27, s.get('deep__val'))
@@ -106,7 +111,7 @@ class OtherSourcesTest(unittest.TestCase):
         self.assertEqual(None, s.get('INSTALL_DIR'))
 
     def test_config_file_src_specifics(self):
-        s = ConfigFileSrc(os.path.join(os.path.dirname(__file__), "config_t_e_s_t.ini"))
+        s = ConfigFileSrc(join(testdir, "config_t_e_s_t.ini"))
 
         self.assertEqual("/dir", s.get('main__INSTALL_DIR'))
         self.assertEqual("27", s.get('deep__val'))
@@ -124,6 +129,28 @@ class OtherSourcesTest(unittest.TestCase):
         self.assertEqual("defdef", s.get('sune sune'))
         self.assertEqual("defdef", s.get('deep__val'))
         self.assertEqual("defdef", s.get('not_set'))
+
+    def test_file_contentsrc__specifics(self):
+        s = FileContent(join(testdir, "content_data_t_e_s_t.txt"))
+
+        self.assertEqual("content", s.get('any'))
+        self.assertEqual("content", s.get('deep__val'))
+
+        s = FileContent(join(testdir, "content_data_with_whitespace_t_e_s_t.txt"))
+
+        self.assertEqual("cont ent", s.get('any'))
+        self.assertEqual("cont ent", s.get('deep__val'))
+
+        s = FileContent(join(testdir, "content_data_with_whitespace_t_e_s_t.txt"), strip=False)
+
+        self.assertEqual("  cont ent\n  \n", s.get('any'))
+
+        with self.assertRaises(FileNotFoundError):
+            FileContent('/tmp/non_existent_file_dsaasddsagerwvwe.ini', fail_on_read_error=True)
+
+        s = FileContent('/tmp/non_existent_file_dsaasddsagerwvwe.ini')
+
+        self.assertEqual(None, s.get('any'))
 
 
 class ConfigTest(unittest.TestCase):
