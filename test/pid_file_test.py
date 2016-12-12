@@ -33,7 +33,7 @@ class Test(unittest.TestCase):
                 self.assertEqual(p.pid, int(f.read().strip()))
 
             os.kill(p.pid, SIGINT)
-            p.join(1)
+            p.join(4)
             self.assertFalse(os.path.exists(self.pf))
         finally:
             p.terminate()
@@ -45,7 +45,8 @@ class Test(unittest.TestCase):
         p = Process(target=normal_run, args=(self.pf,))
         try:
             p.start()
-            p.join(1)
+            p.join(4)
+            sleep(0.01)
             self.assertFalse(p.is_alive())
         finally:
             p.terminate()
