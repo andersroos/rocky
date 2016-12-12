@@ -4,9 +4,6 @@ from configparser import ConfigParser
 from logging import getLogger, NOTSET
 
 import itertools
-
-# TODO Config vs conf
-
 import sys
 
 logger = getLogger("rocky")
@@ -33,9 +30,9 @@ same result every time. It may optionally log config value and source on first u
 Mappings
 
 Mappings can be defined for most config sources defined here. A mapping will map a key to another to make the get use
-that one instead. For example a mapping {'USER': 'LOGNAME'} for an EnvSrc src will make src.get('USER') return the
-value of the LOGNAME environment variable insated of USER. A mapping can be any collections.Mapping or callable
-taking a key returning another. This does not block getting of 'LOGNAME', it is still usable.
+that one instead. For example a mapping {'USER': 'LOGNAME'} for a rocky.config.Env src will make src.get('USER')
+return the value of the LOGNAME environment variable insated of USER. A mapping can be any collections.Mapping or
+callable taking a key returning another. This does not block getting of 'LOGNAME', it is still usable.
 
 NOTE: __-separated strings will not be converted to paths in the mapping, the conversion is only done when calling
 get. For example the mapping {'deep__var': 'var__deep'} will only convert a string to another string,
@@ -79,12 +76,12 @@ except ImportError:
 
 
 __all__ = [
-    "ConfigSrc",
-    "DictSrc",
-    "PropsSrc",
-    "EnvSrc",
-    "PyFileSrc",
-    "ConfigFileSrc",
+    "Base",
+    "Dict",
+    "Props",
+    "Env",
+    "PyFile",
+    "ConfigFile",
     "Default",
     "Config",
     "as_path",
@@ -97,7 +94,7 @@ __all__ = [
 #
 
 
-class ConfigSrc(object):
+class Base(object):
     """ Base class for config source. A config source is anything with a get method and an optional name property. """
 
     def __init__(self, src=None, name=None, mapping=None, include=None):
@@ -137,7 +134,7 @@ class ConfigSrc(object):
         return None
 
 
-class DictSrc(ConfigSrc):
+class Dict(Base):
     """ Reads values from a dict. If using paths values can be read form any depth of dicts in dicts. """
 
     def __init__(self, src=None, name="dict", mapping=None, include=None):
@@ -147,7 +144,7 @@ class DictSrc(ConfigSrc):
         return obj.get(segment, None) if isinstance(obj, Mapping) else None
 
 
-class PropsSrc(ConfigSrc):
+class Props(Base):
     """ Reads values as properties from an object. If using paths values can be read form any depths of peroperties on
     objects. Anything supporting getattr will work, it is for example usable for reading from a python module. """
 
@@ -158,7 +155,7 @@ class PropsSrc(ConfigSrc):
         return getattr(obj, segment, None)
 
 
-class EnvSrc(ConfigSrc):
+class Env(Base):
     """ Reads config variables from environment. This source does not support paths. """
 
     def __init__(self, name='env', mapping=None, include=None):
@@ -170,7 +167,7 @@ class EnvSrc(ConfigSrc):
         return os.environ.get(path[0])
 
 
-class PyFileSrc(PropsSrc):
+class PyFile(Props):
     """ Load python file as a module and read variables from it. """
 
     def __init__(self, filename=None, name=None, mapping=None, include=None, fail_on_not_found=True):
@@ -194,7 +191,7 @@ class PyFileSrc(PropsSrc):
         return super()._get_path(path)
 
 
-class ConfigFileSrc(ConfigSrc):
+class ConfigFile(Base):
     """ Use a config file as source, only supports keys as paths of length 2. """
 
     def __init__(self, filename, name=None, mapping=None, include=None, fail_on_not_found=True):
@@ -250,7 +247,6 @@ class FileContent(object):
         return self.value
 
 
-# TODO Rename to DefaultSrc?
 class Default(object):
     """ Very simple config source that returns the same value for all keys. """
     

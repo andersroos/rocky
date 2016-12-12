@@ -4,7 +4,7 @@ from collections import namedtuple
 
 from os.path import join, dirname
 
-from rocky.config import DictSrc, as_path, PropsSrc, EnvSrc, PyFileSrc, ConfigFileSrc, Config, Default, FileContent
+from rocky.config import Dict, as_path, Props, Env, PyFile, ConfigFile, Config, Default, FileContent
 
 
 testdir = dirname(__file__)
@@ -13,7 +13,7 @@ testdir = dirname(__file__)
 class DictSrcTest(unittest.TestCase):
 
     def test_unmapped_unfiltered_get_values(self):
-        s = DictSrc(dict(INSTALL_DIR='/dir', deep=dict(var=23)))
+        s = Dict(dict(INSTALL_DIR='/dir', deep=dict(var=23)))
 
         self.assertEqual('/dir', s.get('INSTALL_DIR'))
         self.assertEqual('/dir', s.get(('INSTALL_DIR',)))
@@ -26,12 +26,12 @@ class DictSrcTest(unittest.TestCase):
         self.assertEqual(23, s.get(['deep', 'var']))
 
     def test_mapped_get_values(self):
-        s = DictSrc(dict(INSTALL_DIR='/dir'), mapping={"inst_dir":"INSTALL_DIR"})
+        s = Dict(dict(INSTALL_DIR='/dir'), mapping={"inst_dir": "INSTALL_DIR"})
 
         self.assertEqual('/dir', s.get('INSTALL_DIR'))
         self.assertEqual('/dir', s.get('inst_dir'))
 
-        s = DictSrc(dict(deep=dict(var=23)), mapping={('deepu', 'varu'): ("deep", "var")})
+        s = Dict(dict(deep=dict(var=23)), mapping={('deepu', 'varu'): ("deep", "var")})
 
         self.assertEqual(dict(var=23), s.get('deep'))
         self.assertEqual(23, s.get('deep__var'))
@@ -40,13 +40,13 @@ class DictSrcTest(unittest.TestCase):
         self.assertEqual(None, s.get('deepu'))
         self.assertEqual(None, s.get(['deepu', 'var']))
 
-        s = DictSrc(dict(INSTALL_DIR='/dir'), mapping=lambda n: n + "_DIR")
+        s = Dict(dict(INSTALL_DIR='/dir'), mapping=lambda n: n + "_DIR")
 
         self.assertEqual(None, s.get('INSTALL_DIR'))
         self.assertEqual('/dir', s.get('INSTALL'))
         self.assertEqual('/dir', s.get(('INSTALL',)))
 
-        s = DictSrc(dict(deep=dict(var=23)), mapping=lambda n: as_path(n) + ("var",))
+        s = Dict(dict(deep=dict(var=23)), mapping=lambda n: as_path(n) + ("var",))
 
         self.assertEqual(23, s.get('deep'))
         self.assertEqual(23, s.get(('deep',)))
@@ -54,8 +54,8 @@ class DictSrcTest(unittest.TestCase):
         self.assertEqual(None, s.get(['deep', 'var']))  # ????
 
     def test_filtered_get_values(self):
-        s = DictSrc(dict(INSTALL_DIR='/dir', deep=dict(var=23), tuple=44),
-                     include=["INSTALL_DIR", ('tuple',), ('deep', 'var'), 'not_present', 'not__a_path'])
+        s = Dict(dict(INSTALL_DIR='/dir', deep=dict(var=23), tuple=44),
+                 include=["INSTALL_DIR", ('tuple',), ('deep', 'var'), 'not_present', 'not__a_path'])
 
         self.assertEqual('/dir', s.get('INSTALL_DIR'))
         self.assertEqual('/dir', s.get(('INSTALL_DIR',)))
@@ -69,7 +69,7 @@ class DictSrcTest(unittest.TestCase):
         self.assertEqual(None, s.get(('not', 'a_path')))
 
     def test_filtered_mapped_get_values(self):
-        ds = DictSrc(dict(INSTALL_DIR='/dir'), include=["inst_dir"], mapping={'inst_dir': 'INSTALL_DIR'})
+        ds = Dict(dict(INSTALL_DIR='/dir'), include=["inst_dir"], mapping={'inst_dir': 'INSTALL_DIR'})
 
         self.assertEqual('/dir', ds.get('inst_dir'))
         self.assertEqual(None, ds.get("INSTALL_DIR"))
@@ -78,7 +78,7 @@ class DictSrcTest(unittest.TestCase):
 class OtherSourcesTest(unittest.TestCase):
 
     def test_prop_src_specifics(self):
-        s = PropsSrc(namedtuple("o1", "foo,deep")(foo=44, deep=namedtuple("o2", "val")(val=23)))
+        s = Props(namedtuple("o1", "foo,deep")(foo=44, deep=namedtuple("o2", "val")(val=23)))
 
         self.assertEqual(44, s.get('foo'))
         self.assertEqual(23, s.get('deep__val'))
@@ -89,7 +89,7 @@ class OtherSourcesTest(unittest.TestCase):
         os.environ['testing_an_environment_variable'] = "23"
         os.environ['paths_separated_by__works_only_by_tuple'] = "44"
 
-        s = EnvSrc()
+        s = Env()
 
         self.assertEqual("23", s.get('testing_an_environment_variable'))
         self.assertEqual(None, s.get('paths_separated_by__works_only_by_tuple',))
@@ -97,29 +97,29 @@ class OtherSourcesTest(unittest.TestCase):
         self.assertEqual(None, s.get('testing_a_hopefully_non_existent_environment_variable_4335'))
 
     def test_py_file_src_specifics(self):
-        s = PyFileSrc(join(testdir, "conf_python_module_for_t_e_s_t.py"))
+        s = PyFile(join(testdir, "conf_python_module_for_t_e_s_t.py"))
 
         self.assertEqual("/dir", s.get('INSTALL_DIR'))
         self.assertEqual(27, s.get('deep__val'))
         self.assertEqual(28, s.get('IF'))
         self.assertEqual(None, s.get('not_set'))
 
-        with self.assertRaises(FileNotFoundError): PyFileSrc('/tmp/non_existent_file_dsaasddsagerwvwe.py')
+        with self.assertRaises(FileNotFoundError): PyFile('/tmp/non_existent_file_dsaasddsagerwvwe.py')
 
-        s = PyFileSrc('/tmp/non_existent_file_dsaasddsagerwvwe.py', fail_on_not_found=False)
+        s = PyFile('/tmp/non_existent_file_dsaasddsagerwvwe.py', fail_on_not_found=False)
 
         self.assertEqual(None, s.get('INSTALL_DIR'))
 
     def test_config_file_src_specifics(self):
-        s = ConfigFileSrc(join(testdir, "config_t_e_s_t.ini"))
+        s = ConfigFile(join(testdir, "config_t_e_s_t.ini"))
 
         self.assertEqual("/dir", s.get('main__INSTALL_DIR'))
         self.assertEqual("27", s.get('deep__val'))
         self.assertEqual(None, s.get('not_set'))
 
-        with self.assertRaises(FileNotFoundError): ConfigFileSrc('/tmp/non_existent_file_dsaasddsagerwvwe.ini')
+        with self.assertRaises(FileNotFoundError): ConfigFile('/tmp/non_existent_file_dsaasddsagerwvwe.ini')
 
-        s = ConfigFileSrc('/tmp/non_existent_file_dsaasddsagerwvwe.ini', fail_on_not_found=False)
+        s = ConfigFile('/tmp/non_existent_file_dsaasddsagerwvwe.ini', fail_on_not_found=False)
 
         self.assertEqual(None, s.get('main__INSTALL_DIR'))
 
@@ -156,7 +156,7 @@ class OtherSourcesTest(unittest.TestCase):
 class ConfigTest(unittest.TestCase):
 
     def test_get_config_as_prop_and_string(self):
-        c = Config(DictSrc(dict(INSTALL_DIR='/dir', deep=dict(var=27))))
+        c = Config(Dict(dict(INSTALL_DIR='/dir', deep=dict(var=27))))
 
         self.assertEqual("/dir", c.get('INSTALL_DIR'))
         self.assertEqual("/dir", c.INSTALL_DIR)
@@ -167,7 +167,7 @@ class ConfigTest(unittest.TestCase):
 
     def test_get_config_is_cached(self):
         d = {'foo': 27}
-        c = Config(DictSrc(d))
+        c = Config(Dict(d))
 
         self.assertEqual(27, c.foo)
 
@@ -176,17 +176,17 @@ class ConfigTest(unittest.TestCase):
         self.assertEqual(27, c.get("foo"))
 
     def test_get_config_source_order(self):
-        s1 = DictSrc({'foo': 27})
-        s2 = DictSrc({'foo': 28, 'bar': 19})
+        s1 = Dict({'foo': 27})
+        s2 = Dict({'foo': 28, 'bar': 19})
         c = Config(s1, s2)
 
         self.assertEqual((27, s1), c.get_with_source('foo'))
         self.assertEqual((19, s2), c.get_with_source('bar'))
 
     def test_get_in_different_source_orders(self):
-        s1 = DictSrc({'foo': 1, 'bar': 1, 'fun': 1})
-        s2 = DictSrc({'foo': 2, 'bar': 2, 'fun': 2})
-        s3 = DictSrc({'foo': 3, 'bar': 3, 'fun': 3})
+        s1 = Dict({'foo': 1, 'bar': 1, 'fun': 1})
+        s2 = Dict({'foo': 2, 'bar': 2, 'fun': 2})
+        s3 = Dict({'foo': 3, 'bar': 3, 'fun': 3})
 
         c = Config(s1, s2, s3)
         self.assertEqual(1, c.foo)
@@ -203,9 +203,9 @@ class ConfigTest(unittest.TestCase):
         self.assertEqual(1, c.fun)
 
     def test_get_chaning_default_source_order(self):
-        s1 = DictSrc({'foo': 1, 'bar': 1, 'fun': 1})
-        s2 = DictSrc({'foo': 2, 'bar': 2, 'fun': 2})
-        s3 = DictSrc({'foo': 3, 'bar': 3, 'fun': 3})
+        s1 = Dict({'foo': 1, 'bar': 1, 'fun': 1})
+        s2 = Dict({'foo': 2, 'bar': 2, 'fun': 2})
+        s3 = Dict({'foo': 3, 'bar': 3, 'fun': 3})
 
         c = Config(s1, s2, s3)
         self.assertEqual(1, c.foo)
@@ -219,7 +219,7 @@ class ConfigTest(unittest.TestCase):
         self.assertEqual(3, c.fun)
 
     def test_get_with_default(self):
-        c = Config(DictSrc({'foo': 1}))
+        c = Config(Dict({'foo': 1}))
 
         self.assertEqual(1, c.get('foo', default=23))
         self.assertEqual(23, c.get('bar', default=23))
