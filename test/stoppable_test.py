@@ -23,8 +23,8 @@ def nasty_process():
 class Test(unittest.TestCase):
 
     def test_nice_process_is_stopped_after_one_signal(self):
+        p = Process(target=nice_process)
         try:
-            p = Process(target=nice_process)
             p.start()
             sleep(0.01)
 

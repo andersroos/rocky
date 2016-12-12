@@ -145,7 +145,8 @@ class pid_file(ContextDecorator):
     
     Pid file will be locked when reading and writing.
     """
-    
+
+    # TODO Change default to a writable dir?
     def __init__(self,
                  filename=None,
                  dirname='/var/run',
