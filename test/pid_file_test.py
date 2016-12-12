@@ -46,7 +46,10 @@ class Test(unittest.TestCase):
         try:
             p.start()
             p.join(4)
-            sleep(0.01)
+            for _ in range(40):
+                if not p.is_alive():
+                    break
+                sleep(0.1)
             self.assertFalse(p.is_alive())
         finally:
             p.terminate()
