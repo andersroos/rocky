@@ -9,7 +9,7 @@ with open(path.join(setup_dir, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='rocky',
-    version='0.0.0.b0',
+    version='0.0.0',
     description='Better command line programs in production, no need to worry, this is a lib, not a framework.',
     long_description=long_description,
     url='https://github.com/andersroos/rocky',
@@ -17,7 +17,7 @@ setup(
     author_email='anders.roos@gmail.com',
     license='Apache-2.0',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3',
