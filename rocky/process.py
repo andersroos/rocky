@@ -95,21 +95,29 @@ class stoppable(handle_signals):
         if self._count < 0:
             sys.exit(1)
         logger.info("got signal %d, breaking as soon as possible, %d left before kill" % (signum, self._count))
-        self.stop()
-
-    def check_stop(self, throw=True):
-        """ Check if stop flag is set. If throw is True (default) SystemExit will be raised, if not it returns False if
-        program should stop. """
-        if not throw:
-            return not self._stop
-
-        if self._stop:
-            raise SystemExit()
-
-    def stop(self):
-        """ Set stop to true explicitly. """
         self._stop = True
 
+    def check_stop(self, throw=True):
+        """ Raise SystemExit if stop flag is set. If throw is False, it will not raise exception but return the
+        stop property, this can be useful if it is more convenient to pass this method as a callable. """
+        if not throw:
+            raise SystemExit()
+
+        return self.stop
+
+    @property
+    def stop(self):
+        """ Set to true when stop is requested, can also be set to true explicitly if stopping is wanted. """
+        return self._stop
+
+    @stop.setter
+    def stop(self, value):
+        self._stop = value
+        
+    @property
+    def go_on(self):
+        """ The inverse of stop. """
+        return not self._stop
 
 class pstack(handle_signals):
     """ Dump python stack in log on signal (default SIGUSR1). """
