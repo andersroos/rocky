@@ -12,7 +12,7 @@ from rocky.process import pid_file, stoppable
 
 def normal_run(pf):
     with pid_file(filename=pf) as p, stoppable() as s:
-        while s.check_stop(throw=False):
+        while s.go_on:
             sleep(0.01)
 
 
