@@ -100,10 +100,10 @@ class stoppable(handle_signals):
     def check_stop(self, throw=True):
         """ Raise SystemExit if stop flag is set. If throw is False, it will not raise exception but return the
         stop property, this can be useful if it is more convenient to pass this method as a callable. """
-        if not throw:
+        if throw and self._stop:
             raise SystemExit()
 
-        return self.stop
+        return self._stop
 
     @property
     def stop(self):
