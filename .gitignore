@@ -1,5 +1,6 @@
 .idea/
-rocky.egg-info/
+*.egg-info/
 build/
 dist/
 __pycache__
+local.mk
