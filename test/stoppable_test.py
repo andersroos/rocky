@@ -39,7 +39,7 @@ class Test(unittest.TestCase):
         p = Process(target=nasty_process)
         try:
             p.start()
-            for _ in range(4):
+            for _ in range(10):
                 sleep(0.01)
                 os.kill(p.pid, SIGINT)
 
