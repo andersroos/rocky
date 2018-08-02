@@ -21,7 +21,7 @@ test:
 publish: clean
 	$(PYTHON) setup.py sdist
 	$(PYTHON) setup.py bdist_wheel
-	$(TWINE) upload dist/*
+	$(TWINE) upload --repository-url https://upload.pypi.org/legacy/ dist/*
 
 clean:
 	rm -rf dist rocky.egg-info build

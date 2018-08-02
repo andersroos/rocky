@@ -4,3 +4,6 @@ psutil
 # Dev/Test
 nose
 twine
+wheel
+pip
+
