@@ -9,7 +9,7 @@ with open(path.join(setup_dir, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='rocky',
-    version='1.0.1.dev0',
+    version='1.0.1',
     description='Better command line programs in production, no need to worry, this is a lib, not a framework.',
     long_description=long_description,
     url='https://github.com/andersroos/rocky',
@@ -23,6 +23,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Environment :: Console',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
