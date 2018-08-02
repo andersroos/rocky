@@ -47,7 +47,7 @@ class Test(unittest.TestCase):
 
             os.kill(p.pid, SIGINT)
 
-            p.join(2)
+            p.join(10)
             self.assertFalse(p.is_alive())
         finally:
             p.terminate()
