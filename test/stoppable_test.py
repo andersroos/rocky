@@ -17,7 +17,7 @@ def nice_process():
 def nasty_process():
     with stoppable() as s:
         while True:
-            sleep(1)
+            sleep(0.01)
 
 
 class Test(unittest.TestCase):
