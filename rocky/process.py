@@ -39,7 +39,7 @@ class log_exception(ContextDecorator):
             return
         if any(isinstance(exc_val, i) for i in self.ignore):
             return True
-        logger.exception(self.message)
+        logger.exception(self.message + str(exc_val))
         if self.status:
             sys.exit(self.status)
 
