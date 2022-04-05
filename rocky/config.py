@@ -1,5 +1,6 @@
 import os
-from collections import Mapping, OrderedDict, Iterable
+from collections import OrderedDict
+from collections.abc import Mapping, Iterable
 from configparser import ConfigParser
 from logging import getLogger, NOTSET
 
